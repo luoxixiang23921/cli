@@ -28,6 +28,8 @@ from .uploads import (
     get_multipart_data_and_content_type,
 )
 from .utils import get_expired_cookies, repr_dict
+from httpie.cli.dicts import RequestJSONDataDict
+
 
 
 urllib3.disable_warnings()
@@ -356,6 +358,16 @@ def make_request_kwargs(
             boundary=args.boundary,
             content_type=args.headers.get('Content-Type'),
         )
+
+    if (
+        args.method.upper() == 'GET'
+        and isinstance(data, RequestJSONDataDict)
+        and not data
+        and args.auth_plugin
+        and args.auth_plugin.auth_type == 'digest'
+        and 'auth-int' in args.url
+    ):
+        data = b""
 
     return {
         'method': args.method.lower(),
